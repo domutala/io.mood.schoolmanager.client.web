@@ -53,7 +53,7 @@ export default class extends Vue {
   @Watch("value")
   on_value() {
     const textarea = this.$refs.textarea as HTMLDivElement;
-    if (textarea.outerText !== this.value) {
+    if (textarea.innerText !== this.value) {
       const v = this.value || "";
       textarea.innerText = v;
     }
@@ -63,8 +63,8 @@ export default class extends Vue {
     const textarea = this.$refs.textarea as HTMLDivElement;
     const input = this.$refs.input as HTMLInputElement;
 
-    input.value = textarea.outerText;
-    this.$emit("input", textarea.outerText);
+    input.value = textarea.innerText;
+    this.$emit("input", textarea.innerText);
   }
 }
 </script>
