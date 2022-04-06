@@ -32,5 +32,6 @@ export default class extends Vue {
   top: 0;
   background-color: rgba(var(--light), 1);
   box-shadow: rgba(var(--dark), 0.07) 0px 10px 10px -10px;
+  display: none;
 }
 </style>

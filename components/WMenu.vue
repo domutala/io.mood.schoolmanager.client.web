@@ -13,7 +13,7 @@
         </a>
       </div>
 
-      <div class="item">
+      <div class="item" @click="setTheme">
         <a class="link" href="#">
           <i class="fi fi-sr-settings"></i>
         </a>
@@ -30,12 +30,16 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import { Getter } from "vuex-class";
+import { Params } from "~/models/Params";
 import { ISession } from "~/models/Session";
 
 @Component
 export default class Comp extends Vue {
   @Getter("get", { namespace: "session" })
   session!: ISession;
+
+  @Getter("get", { namespace: "params" })
+  params!: Params;
 
   user: any | false = false;
   loading = false;
@@ -45,6 +49,16 @@ export default class Comp extends Vue {
   }
 
   init() {}
+
+  setTheme() {
+    let theme = this.params.theme;
+
+    if (theme === "dark") theme = "light";
+    else if (theme === "light") theme = undefined;
+    else theme = "light";
+
+    this.$nuxt.context.$style.set(theme);
+  }
 }
 </script>
 

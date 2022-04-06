@@ -1,26 +1,20 @@
 <template>
-  <div class="m-input" :class="{ error, success, labeled: val }">
-    <div class="__the_content">
-      <div class="__left_icon">
-        <slot name="left" />
-      </div>
-
-      <div class="__include">
-        <div v-if="placeholder" class="__placeholder">
+  <div class="ninput" :class="{ error, success }">
+    <div class="cadre" :class="{ labeled: val }">
+      <slot name="left" />
+      <div class="include">
+        <div v-if="placeholder" class="placeholder">
           <span>{{ placeholder }}</span>
         </div>
         <slot />
       </div>
-
-      <div class="__right_icon">
-        <slot name="right" />
-      </div>
+      <slot name="right" />
     </div>
 
-    <div v-if="error && error !== true" class="__error">
+    <div v-if="error && error !== true" class="error">
       {{ error }}
     </div>
-    <div v-if="success && success !== true" class="__success">
+    <div v-if="success && success !== true" class="success">
       {{ success }}
     </div>
   </div>
@@ -30,7 +24,10 @@
 import { Component, Prop, Vue } from "vue-property-decorator";
 
 @Component
-export default class Comp extends Vue {
+export default class extends Vue {
+  @Prop()
+  value!: any;
+
   @Prop({ type: String })
   placeholder!: string;
 
@@ -40,82 +37,93 @@ export default class Comp extends Vue {
   @Prop({ type: [String, Boolean], default: false })
   success!: string | boolean;
 
-  val = "";
+  get val() {
+    if (Array.isArray(this.value)) return this.value.length !== 0;
+
+    if (["string", "number"].includes(typeof this.value)) {
+      return (this.value as string).toString().length !== 0;
+    }
+
+    if (typeof this.value === "boolean") {
+      return this.value.toString().length !== 0;
+    }
+
+    if (typeof this.value === "object") {
+      return Object.keys(this.value).toString().length !== 0;
+    }
+
+    return false;
+  }
 
   mounted() {
     this.init();
   }
 
-  init() {
-    let input: any = this.$el.querySelector("input");
-    if (!input) input = this.$el.querySelector("select");
-
-    if (input) {
-      input.addEventListener("input", () => {
-        this.val = input.value;
-      });
-    }
-  }
+  init() {}
 }
 </script>
 
 <style lang="scss">
-.m-input {
+.ninput {
   width: 100%;
 
-  .__the_content {
-    height: 50px;
+  .cadre {
     border-radius: 0.6em;
-    border: 1px solid rgba(var(--dark), 0.5);
-    position: relative;
-
+    box-shadow: rgba(var(--dark), 0.06) 0px 0px 0px 1px;
     display: flex;
-    align-items: center;
     padding-left: 10px;
     padding-right: 10px;
 
-    .__left_icon {
-      > * {
-        margin-right: 10px;
-      }
-    }
-
-    .__right_icon {
-      > * {
-        margin-left: 10px;
-      }
-    }
-
-    .__include {
+    .include {
       width: 100%;
-      height: 100%;
       position: relative;
 
+      .text,
+      .input,
       select,
       input {
         border: 0;
         width: 100%;
-        height: 100%;
+        min-height: 50px;
         padding: 0;
         background-color: transparent;
         outline: none;
         font: inherit;
         color: inherit;
-        position: absolute;
-        top: 0;
-        left: 0;
         line-height: 1;
+        position: relative;
+
+        &.input {
+          display: flex;
+          align-items: center;
+          cursor: default;
+        }
+
+        &.text {
+          > div {
+            max-height: 200px;
+            overflow: auto;
+            width: 100%;
+            min-height: 50px;
+            font: inherit;
+            color: inherit;
+            line-height: 1;
+            transition: all 0.25s ease;
+          }
+        }
       }
 
-      .__placeholder {
+      .placeholder {
         user-select: none;
         width: 100%;
-        height: 100%;
+        height: 50px;
         display: flex;
         align-items: center;
         color: rgba(var(--dark), 1);
-        transition: all 0.25s ease;
         line-height: 1;
+        position: absolute;
+        top: 0;
+        left: 0;
 
         span {
           transition: all 0.25s ease;
@@ -127,68 +135,76 @@ export default class Comp extends Vue {
         }
       }
     }
+
+    > * {
+      &:not(.include) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 50px;
+
+        &:first-child {
+          margin-right: 10px;
+        }
+
+        &:last-child {
+          margin-left: 10px;
+        }
+      }
+    }
+
+    &.labeled,
+    &:focus-within {
+      &:focus-within {
+        box-shadow: rgba(var(--primary), 0.6) 0px 0px 0px 1px;
+      }
+
+      .include {
+        .text {
+          min-height: unset;
+
+          > div {
+            margin-top: 17px;
+            margin-bottom: 1px;
+            min-height: unset;
+          }
+        }
+        .placeholder {
+          position: absolute;
+          top: 3px;
+          font-size: 70%;
+          height: 16px;
+          z-index: 1;
+        }
+      }
+    }
   }
 
-  .__success,
-  .__error {
+  &.error {
+    .cadre {
+      box-shadow: rgba(var(--danger), 0.6) 0px 0px 0px 1px;
+    }
+  }
+  &.success {
+    .cadre {
+      box-shadow: rgba(var(--success), 0.6) 0px 0px 0px 1px;
+    }
+  }
+
+  .success,
+  .error {
     font-size: 80%;
     color: rgba(var(--danger), 1);
     padding-left: 7px;
     padding-right: 7px;
     margin-top: 2px;
 
-    &.__success {
+    &.success {
       color: rgba(var(--success), 1);
     }
   }
 
-  &:focus-within,
-  &.labeled {
-    .__the_content {
-      .__include {
-        position: unset;
-
-        select,
-        input {
-          position: relative;
-        }
-
-        .__placeholder {
-          position: absolute;
-          bottom: calc(100% - 15px);
-          left: 10px;
-          right: 10px;
-          font-size: 70%;
-          height: unset;
-          width: unset;
-
-          span {
-            margin: 0;
-          }
-        }
-      }
-    }
-  }
-
-  &:focus-within {
-    .__the_content {
-      border-color: rgba(var(--dark), 1);
-    }
-  }
-
-  &.error {
-    .__the_content {
-      border-color: rgba(var(--danger), 1);
-    }
-  }
-
-  &.success {
-    .__the_content {
-      border-color: rgba(var(--success), 1);
-    }
-  }
-
-  + .m-input {
+  + {
     margin-top: 10px;
   }
 }
